@@ -3,8 +3,8 @@ package eventsource_test
 import (
 	"testing"
 
-	"github.com/savaki/eventsource"
 	"github.com/stretchr/testify/assert"
+	"github.com/zerops/eventsource"
 )
 
 type EntitySetName struct {

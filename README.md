@@ -5,7 +5,7 @@ golang event sourcing library
 ## Installation
 
 ```
-go get github.com/savaki/eventsource
+go get github.com/zerops/eventsource
 ```
 
 ## Example 
@@ -19,7 +19,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/savaki/eventsource"
+	"github.com/zerops/eventsource"
 )
 
 // UserCreated defines a user creation event

@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/savaki/eventsource"
+	"github.com/zerops/eventsource"
 )
 
 // UserCreated defines a user creation event

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/savaki/eventsource"
 	"github.com/stretchr/testify/assert"
+	"github.com/zerops/eventsource"
 )
 
 type Entity struct {

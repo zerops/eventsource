@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 
-	"github.com/savaki/eventsource"
+	"github.com/zerops/eventsource"
 )
 
 type Model struct {

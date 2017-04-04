@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/savaki/eventsource"
+	"github.com/zerops/eventsource"
 )
 
 const (

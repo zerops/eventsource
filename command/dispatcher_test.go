@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/savaki/eventsource"
-	"github.com/savaki/eventsource/command"
 	"github.com/stretchr/testify/assert"
+	"github.com/zerops/eventsource"
+	"github.com/zerops/eventsource/command"
 )
 
 type User struct {
