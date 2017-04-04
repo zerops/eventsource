@@ -21,8 +21,7 @@ func TestJSONSerializer(t *testing.T) {
 		Name: "blah",
 	}
 
-	serializer := eventsource.JSONSerializer()
-	serializer.Bind(event)
+	serializer := eventsource.NewJSONSerializer(event)
 	record, err := serializer.Serialize(event)
 	assert.Nil(t, err)
 	assert.NotNil(t, record)

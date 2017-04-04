@@ -92,8 +92,11 @@ func (u *User) Apply(ctx context.Context, cmd command.Interface) ([]eventsource.
 }
 
 func TestLifecycle(t *testing.T) {
-	repo := eventsource.New(&User{})
-	repo.Bind(UserCreated{}, UserEmailChanged{})
+	repo := eventsource.New(&User{},
+		eventsource.WithSerializer(eventsource.NewJSONSerializer(
+			UserCreated{},
+			UserEmailChanged{},
+		)))
 
 	ctx := context.Background()
 	id := "123"

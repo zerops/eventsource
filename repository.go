@@ -24,10 +24,6 @@ type Aggregate interface {
 
 // Repository represents provides a standardized interface into the event db
 type Repository interface {
-	// Bind tells the repository what the set of valid events are
-	// todo - consider making this the responsibility of the serializer only
-	Bind(events ...Event) error
-
 	// Load the Aggregate with the specified id
 	// todo - create a defined error type (or function) to indicate not found
 	Load(ctx context.Context, aggregateID string) (Aggregate, error)
@@ -43,7 +39,6 @@ type repository struct {
 	prototype  reflect.Type
 	store      Store
 	serializer Serializer
-	types      map[string]reflect.Type
 	writer     io.Writer
 	debug      bool
 }
@@ -58,8 +53,7 @@ func New(prototype Aggregate, opts ...Option) Repository {
 	r := &repository{
 		prototype:  t,
 		store:      newMemoryStore(),
-		serializer: JSONSerializer(),
-		types:      map[string]reflect.Type{},
+		serializer: NewJSONSerializer(),
 	}
 
 	for _, opt := range opts {
@@ -82,41 +76,6 @@ func (r *repository) logf(format string, args ...interface{}) {
 	if !strings.HasSuffix(format, "\n") {
 		io.WriteString(r.writer, "\n")
 	}
-}
-
-// EventType is a helper func that extracts the event type of the event along with the reflect.Type of the event.
-//
-// Primarily useful for serializers that need to understand how marshal and unmarshal instances of Event to a []byte
-func EventType(event Event) (string, reflect.Type) {
-	t := reflect.TypeOf(event)
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-
-	if v, ok := event.(EventTyper); ok {
-		return v.EventType(), t
-	}
-
-	return t.Name(), t
-}
-
-func (r *repository) Bind(events ...Event) error {
-	for _, event := range events {
-		if event == nil {
-			return errors.New("attempt to bind nil event")
-		}
-
-		err := r.serializer.Bind(event)
-		if err != nil {
-			return err
-		}
-
-		eventType, typ := EventType(event)
-		r.logf("Binding %12s => %#v", eventType, event)
-		r.types[eventType] = typ
-	}
-
-	return nil
 }
 
 // New returns a new instance of the aggregate
@@ -173,6 +132,22 @@ func (r *repository) Load(ctx context.Context, aggregateID string) (Aggregate, e
 	}
 
 	return aggregate.(Aggregate), nil
+}
+
+// EventType is a helper func that extracts the event type of the event along with the reflect.Type of the event.
+//
+// Primarily useful for serializers that need to understand how marshal and unmarshal instances of Event to a []byte
+func EventType(event Event) (string, reflect.Type) {
+	t := reflect.TypeOf(event)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	if v, ok := event.(EventTyper); ok {
+		return v.EventType(), t
+	}
+
+	return t.Name(), t
 }
 
 type Option func(registry *repository)

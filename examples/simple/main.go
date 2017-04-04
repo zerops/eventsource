@@ -69,15 +69,12 @@ func (item *User) On(event eventsource.Event) bool {
 }
 
 func main() {
-	repo := eventsource.New(&User{})
-	err := repo.Bind(
-		UserCreated{},
-		UserNameSet{},
-		UserEmailSet{},
-	)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	repo := eventsource.New(&User{},
+		eventsource.WithSerializer(eventsource.NewJSONSerializer(
+			UserCreated{},
+			UserNameSet{},
+			UserEmailSet{},
+		)))
 
 	id := "123"
 	setNameEvent := &UserNameSet{
@@ -91,7 +88,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	err = repo.Save(ctx, setEmailEvent, setNameEvent)
+	err := repo.Save(ctx, setEmailEvent, setNameEvent)
 	if err != nil {
 		log.Fatalln(err)
 	}

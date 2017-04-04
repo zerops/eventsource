@@ -6,7 +6,6 @@ import (
 )
 
 type Serializer interface {
-	Bind(events ...Event) error
 	Serialize(event Event) (Record, error)
 	Deserialize(record Record) (Event, error)
 }
@@ -16,20 +15,18 @@ type jsonEvent struct {
 	Data json.RawMessage `json:"d"`
 }
 
-type jsonSerializer struct {
+type JSONSerializer struct {
 	eventTypes map[string]reflect.Type
 }
 
-func (j *jsonSerializer) Bind(events ...Event) error {
+func (j *JSONSerializer) Bind(events ...Event) {
 	for _, event := range events {
 		eventType, t := EventType(event)
 		j.eventTypes[eventType] = t
 	}
-
-	return nil
 }
 
-func (j *jsonSerializer) Serialize(v Event) (Record, error) {
+func (j *JSONSerializer) Serialize(v Event) (Record, error) {
 	eventType, _ := EventType(v)
 
 	data, err := json.Marshal(v)
@@ -52,7 +49,7 @@ func (j *jsonSerializer) Serialize(v Event) (Record, error) {
 	}, nil
 }
 
-func (j *jsonSerializer) Deserialize(record Record) (Event, error) {
+func (j *JSONSerializer) Deserialize(record Record) (Event, error) {
 	wrapper := jsonEvent{}
 	err := json.Unmarshal(record.Data, &wrapper)
 	if err != nil {
@@ -73,8 +70,11 @@ func (j *jsonSerializer) Deserialize(record Record) (Event, error) {
 	return v.(Event), nil
 }
 
-func JSONSerializer() Serializer {
-	return &jsonSerializer{
+func NewJSONSerializer(events ...Event) *JSONSerializer {
+	serializer := &JSONSerializer{
 		eventTypes: map[string]reflect.Type{},
 	}
+	serializer.Bind(events...)
+
+	return serializer
 }

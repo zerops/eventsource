@@ -59,11 +59,16 @@ func TestRegistry(t *testing.T) {
 	ctx := context.Background()
 	id := "123"
 	name := "Jones"
+	serializer := eventsource.NewJSONSerializer(
+		EntityCreated{},
+		EntityNameSet{},
+	)
 
 	t.Run("simple", func(t *testing.T) {
-		registry := eventsource.New(&Entity{}, eventsource.WithDebug(os.Stdout))
-		registry.Bind(EntityCreated{})
-		registry.Bind(EntityNameSet{})
+		registry := eventsource.New(&Entity{},
+			eventsource.WithSerializer(serializer),
+			eventsource.WithDebug(os.Stdout),
+		)
 
 		// Test - Add an event to the store and verify we can recreate the object
 
@@ -106,9 +111,9 @@ func TestRegistry(t *testing.T) {
 	})
 
 	t.Run("with pointer prototype", func(t *testing.T) {
-		registry := eventsource.New(&Entity{})
-		registry.Bind(EntityCreated{})
-		registry.Bind(EntityNameSet{})
+		registry := eventsource.New(&Entity{},
+			eventsource.WithSerializer(serializer),
+		)
 
 		err := registry.Save(ctx,
 			&EntityCreated{
@@ -127,8 +132,9 @@ func TestRegistry(t *testing.T) {
 	})
 
 	t.Run("with pointer bind", func(t *testing.T) {
-		registry := eventsource.New(&Entity{})
-		registry.Bind(&EntityNameSet{})
+		registry := eventsource.New(&Entity{},
+			eventsource.WithSerializer(serializer),
+		)
 
 		err := registry.Save(ctx,
 			&EntityNameSet{
@@ -148,8 +154,10 @@ func TestAt(t *testing.T) {
 	ctx := context.Background()
 	id := "123"
 
-	registry := eventsource.New(&Entity{}, eventsource.WithDebug(os.Stdout))
-	registry.Bind(EntityCreated{})
+	registry := eventsource.New(&Entity{},
+		eventsource.WithSerializer(eventsource.NewJSONSerializer(EntityCreated{})),
+	)
+
 	err := registry.Save(ctx,
 		&EntityCreated{
 			Model: eventsource.Model{ID: id, Version: 1, At: time.Now()},
