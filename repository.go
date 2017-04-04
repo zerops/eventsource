@@ -22,10 +22,20 @@ type Aggregate interface {
 	On(event Event) bool
 }
 
+// Repository represents provides a standardized interface into the event db
 type Repository interface {
+	// Bind tells the repository what the set of valid events are
+	// todo - consider making this the responsibility of the serializer only
 	Bind(events ...Event) error
+
+	// Load the Aggregate with the specified id
+	// todo - create a defined error type (or function) to indicate not found
 	Load(ctx context.Context, aggregateID string) (Aggregate, error)
+
+	// Save the series of events to the underlying Store
 	Save(ctx context.Context, events ...Event) error
+
+	// New instantiates and returns a new Aggregate instance
 	New() Aggregate
 }
 
@@ -38,6 +48,7 @@ type repository struct {
 	debug      bool
 }
 
+// New creates a new repository using the JSONSerializer and MemoryStore
 func New(prototype Aggregate, opts ...Option) Repository {
 	t := reflect.TypeOf(prototype)
 	if t.Kind() == reflect.Ptr {
